@@ -27,18 +27,30 @@ function formatInZone(ms, timeZone) {
   }).format(ms);
 }
 
+// Intl throws a RangeError for an unknown zone; turn that into a message the page can show
+function checkTimeZone(zone) {
+  if (!zone) throw new Error('The <time> element needs a data-timezone attribute, such as Asia/Ho_Chi_Minh.');
+  try {
+    new Intl.DateTimeFormat('en-GB', { timeZone: zone });
+  } catch {
+    throw new Error(`"${zone}" is not a valid time zone name, such as Asia/Ho_Chi_Minh.`);
+  }
+  return zone;
+}
+
 function initCountdown() {
   let targetMs;
+  let eventZone;
   try {
     // Single source of truth: the <time datetime> attribute
     targetMs = parseUtcIso(timeEl.dateTime);
+    eventZone = checkTimeZone(timeEl.dataset.timezone);
   } catch (error) {
     statusEl.textContent = `Countdown unavailable. ${error.message}`;
     return;
   }
 
   // The visible date is generated from the same attribute, so it can never disagree with it
-  const eventZone = timeEl.dataset.timezone;
   timeEl.textContent = formatInZone(targetMs, eventZone);
 
   const viewerZone = Intl.DateTimeFormat().resolvedOptions().timeZone;

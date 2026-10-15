@@ -156,17 +156,28 @@ Defects found by a sub-task's tests are fixed in separate commits right after it
 
 ## 7. Acceptance Criteria
 
-- [ ] Countdown matches `target - now` to the second, even after the main thread is blocked
-- [ ] Event time shown correctly in the event's time zone and in the visitor's own zone
-- [ ] Exactly one timer exists; it is cleared at zero (no leaks)
-- [ ] Form goes Idle → Submitting → Success / Error; invalid transitions are ignored
-- [ ] 10 rapid submits produce 1 request
-- [ ] XSS payloads in any field are displayed as plain text
-- [ ] Renders at 375px with zero horizontal scroll; contrast ≥ 4.5:1 in light and dark
-- [ ] Full keyboard use; zero console errors; zero CSP violations (served with `npx serve`)
+- [x] Countdown matches `target - now` to the second, even after the main thread is blocked (T-03: 0 s off after a 3 s freeze)
+- [x] Event time shown correctly in the event's time zone and in the visitor's own zone (T-03: Vietnam, New York, India)
+- [x] One timer at a time, none after the event (no leaks) (T-03: 1 while counting and during Halloween, 0 after)
+- [x] Form goes Idle → Submitting → Success / Error; invalid transitions are ignored (T-04: all 40 pairs)
+- [x] 10 rapid submits produce 1 request (T-05: 10 clicks → 1, 10 real Enter presses → 1)
+- [x] XSS payloads in any field are displayed as plain text (T-05: name shown as text; T-07: email payloads rejected by `type="email"`; 0 injected, no script ran)
+- [x] Renders at 375px with zero horizontal scroll; contrast ≥ 4.5:1 in light and dark (T-02, T-06: Lighthouse Accessibility 100)
+- [x] Full keyboard use; zero console errors; zero CSP violations (served with `npx serve`) (T-06)
+- [x] Zero layout shift (slide 21) (T-06: CLS 0.0000 at 4 widths × 3 visitor time zones; Lighthouse 100 in all categories)
 
 ## 8. AI Log
 
+AI assistant: Claude Code. Every draft was committed as written, then tested; every failing test
+became its own fix commit. Details of each defect: `AI_FAILURE_AUDIT.md`.
+
 | Task | What I asked the AI | What I checked, changed or rejected |
 |------|---------------------|-------------------------------------|
-|      |                     |                                     |
+| T-00 | Plan, contracts and WBS for HW3 | My event (Halloween, Vietnam time = `2026-10-30T17:00:00Z`). Replaced a one-shot AI experiment with this test-driven workflow so defects appear in my own history |
+| T-01 | HTML only: `<time>` contract, countdown and form markup, CSP | Tests: 0 divs, labels, the date stored exactly once. Passed; no defects |
+| T-02 | Tokens, reset, layout, form-state styles | Contrast measured before writing CSS; overflow at 3 widths × 2 themes; hidden button stays hidden. Passed |
+| T-03 | Slice 1: drift-free countdown | 8 planned tests passed; 3 review tests failed → Defects 1, 2, 3 fixed in separate commits |
+| T-04 | Slice 2: state machine + fake API | All planned tests passed; review tests R4/R5 (closing at midnight) → Defect 4 |
+| T-05 | Slice 3: double-submit guard + sanitization | All tests passed: 1 request per burst, XSS shown as text, real names accepted. No defects |
+| T-06 | Quality audit | Lighthouse 100 ×4, both themes; CLS 0.002 → Defect 5, plus a larger shift for visitors abroad found with time-zone emulation |
+| T-07 | `AI_FAILURE_AUDIT.md` and this log | Code quotes taken from the draft commits with `git show`; email-field XSS tested before ticking the criterion |

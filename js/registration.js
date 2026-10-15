@@ -18,7 +18,8 @@ export function initRegistration(form, { closesAtMs }) {
   // The DOM is a function of the state: every element is set on every change
   function render(state, detail) {
     form.dataset.state = state;
-    submitBtn.hidden = state === 'success';
+    // Once sign-ups are closed, no state may bring the button back ("Try again" would always fail)
+    submitBtn.hidden = state === 'success' || closed;
     submitBtn.textContent = state === 'error' ? 'Try again' : 'Remind me';
     resetBtn.hidden = state !== 'success';
     statusEl.textContent = state === 'submitting'
@@ -68,6 +69,7 @@ export function initRegistration(form, { closesAtMs }) {
     close() {
       closed = true;
       closedNote.hidden = false;
+      submitBtn.hidden = true;
     },
   };
 }

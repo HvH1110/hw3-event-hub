@@ -1,6 +1,7 @@
 // Form wiring: connects the reminder form to the state machine and the (fake) API.
 import { createFormMachine } from './form-machine.js';
 import { createFakeApi, TIMEOUT_MS } from './api.js';
+import { normalizeText, normalizeEmail, nameProblem } from './sanitize.js';
 
 export function initRegistration(form, { closesAtMs }) {
   const nameInput = form.querySelector('#name');
@@ -13,11 +14,17 @@ export function initRegistration(form, { closesAtMs }) {
 
   const api = createFakeApi({ closesAtMs });
   const machine = createFormMachine(render);
+  const registered = new Set(); // emails that succeeded in this session
   let closed = false;
 
   // The DOM is a function of the state: every element is set on every change
   function render(state, detail) {
+    const busy = state === 'submitting';
     form.dataset.state = state;
+    form.setAttribute('aria-busy', String(busy));
+    // aria-disabled, not disabled: a disabled button would throw keyboard focus away.
+    // The state machine is what actually blocks a second submit.
+    submitBtn.setAttribute('aria-disabled', String(busy));
     // Once sign-ups are closed, no state may bring the button back ("Try again" would always fail)
     submitBtn.hidden = state === 'success' || closed;
     submitBtn.textContent = state === 'error' ? 'Try again' : 'Remind me';
@@ -46,17 +53,34 @@ export function initRegistration(form, { closesAtMs }) {
       errorEl.textContent = 'Sign-ups are closed because Halloween has started.';
       return;
     }
-    if (!machine.send('SUBMIT')) return; // only idle and error accept SUBMIT
+
+    const name = normalizeText(nameInput.value);
+    const email = normalizeEmail(emailInput.value);
+    const problem = nameProblem(name); // e.g. a name of only spaces passes minlength natively
+    if (problem) {
+      nameInput.setCustomValidity(problem);
+      nameInput.reportValidity();
+      return;
+    }
+    if (registered.has(email)) {
+      errorEl.textContent = `${email} is already on the list. One reminder is enough.`;
+      return;
+    }
+
+    if (!machine.send('SUBMIT')) return; // only idle and error accept SUBMIT: no double submits
+    nameInput.value = name; // show exactly what is being sent
+    emailInput.value = email;
     try {
-      const result = await api.register(
-        { name: nameInput.value, email: emailInput.value },
-        { signal: AbortSignal.timeout(TIMEOUT_MS) },
-      );
+      const result = await api.register({ name, email }, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+      registered.add(email);
       machine.send('RESOLVE', result);
     } catch (error) {
       machine.send('REJECT', describe(error));
     }
   });
+
+  // Clear a custom error as soon as the name is edited
+  nameInput.addEventListener('input', () => nameInput.setCustomValidity(''));
 
   resetBtn.addEventListener('click', () => {
     form.reset();

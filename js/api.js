@@ -5,8 +5,12 @@
 export const TIMEOUT_MS = 8000;
 const LATENCY_MS = 1000;
 
+// Requests received, so tests can prove that a burst of submits sends only one
+export const stats = { requests: 0 };
+
 export function createFakeApi({ closesAtMs }) {
   function register({ name, email }, { signal } = {}) {
+    stats.requests += 1;
     return new Promise((resolve, reject) => {
       if (!navigator.onLine) {
         reject(new Error('You seem to be offline. Check your connection, then press "Try again".'));

@@ -12,7 +12,12 @@ export function parseUtcIso(text) {
     throw new Error(`The event time must be a UTC timestamp ending in Z, such as 2026-10-30T17:00:00Z (got "${text}").`);
   }
   const ms = Date.parse(text);
-  if (Number.isNaN(ms)) throw new Error(`"${text}" is not a real date.`);
+  // Date.parse rolls impossible dates over (2026-02-31 becomes 3 March) instead of failing,
+  // so the parsed result must read back as the same date and time that was written
+  const written = text.slice(0, -1).slice(0, 19); // drop the Z and any fraction of a second
+  if (Number.isNaN(ms) || !new Date(ms).toISOString().startsWith(written)) {
+    throw new Error(`"${text}" is not a real date and time.`);
+  }
   return ms;
 }
 

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self';
+                 require-trusted-types-for 'script'">
+  <title>Halloween Countdown for People Over 20</title>
+  <meta name="description"
+        content="A Halloween countdown for people over 20, so you never have to open your work-filled calendar to know how long is left.">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+</head>
+<body>
+  <header>
+    <p class="eyebrow">For adults with haunted calendars</p>
+    <h1>Halloween Countdown for People Over 20</h1>
+    <p>
+      After 20, your calendar fills up with work, and opening it can ruin your whole mood.
+      This page tells you one thing only: how long until Halloween. No calendar required.
+    </p>
+  </header>
+
+  <main>
+    <!-- Event time contract: the datetime attribute is the ONLY place the event instant is stored.
+         It is UTC (ends in Z); data-timezone is where the event happens. JS formats the visible text. -->
+    <section id="countdown" aria-labelledby="countdown-title">
+      <h2 id="countdown-title">Halloween in Vietnam starts in</h2>
+      <p class="clock" id="clock" role="timer" aria-labelledby="countdown-title">
+        <span class="clock-unit"><span class="clock-value" data-unit="days">--</span> <span class="clock-label">days</span></span>
+        <span class="clock-unit"><span class="clock-value" data-unit="hours">--</span> <span class="clock-label">hours</span></span>
+        <span class="clock-unit"><span class="clock-value" data-unit="minutes">--</span> <span class="clock-label">minutes</span></span>
+        <span class="clock-unit"><span class="clock-value" data-unit="seconds">--</span> <span class="clock-label">seconds</span></span>
+      </p>
+      <p class="event-time">
+        Starts at
+        <time id="event-start" datetime="2026-10-30T17:00:00Z" data-timezone="Asia/Ho_Chi_Minh">midnight on Halloween, Vietnam time</time>.
+      </p>
+      <p class="local-time" id="local-time"></p>
+      <p class="countdown-status" id="countdown-status" role="status"></p>
+    </section>
+
+    <section id="reminder" aria-labelledby="reminder-title">
+      <h2 id="reminder-title">Get one Halloween reminder</h2>
+      <p>
+        One message the day before Halloween, so your calendar can stay closed until then.
+        Demo only: there is no real server, so nothing is actually sent.
+      </p>
+
+      <form id="reminder-form" data-state="idle">
+        <p class="field">
+          <label for="name">Your name</label>
+          <input id="name" name="name" type="text" autocomplete="name"
+                 required minlength="2" maxlength="80" aria-describedby="name-hint">
+          <small id="name-hint">Write it however you like, 2 to 80 characters.</small>
+        </p>
+        <p class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" required maxlength="254">
+        </p>
+        <p class="field field-check">
+          <input id="over20" name="over20" type="checkbox" required>
+          <label for="over20">I'm over 20 (and my calendar scares me)</label>
+        </p>
+        <button id="submit-btn" type="submit">Remind me</button>
+        <p class="form-status" id="form-status" role="status"></p>
+        <p class="form-error" id="form-error" role="alert"></p>
+        <button id="reset-btn" type="button" hidden>Sign up someone else</button>
+      </form>
+
+      <details class="demo-notes">
+        <summary>Try the error state</summary>
+        <p>
+          Use an email ending in <code>@fail.test</code>, or switch DevTools to Offline
+          (Network panel) before pressing "Remind me".
+        </p>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <p><small>&copy; 2026 Huynh Vu Hoang &middot; No calendars were opened in the making of this page.</small></p>
+  </footer>
+</body>
+</html>

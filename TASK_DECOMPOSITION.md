@@ -89,10 +89,13 @@ Each JS/CSS commit adds the `<script>` or `<link>` tag for its own file to `inde
 
 ### 3.4 Fake API (`js/api.js`)
 
-- `register({ name, email }, { signal })` resolves after ~1 s with a confirmation.
+- `createFakeApi({ closesAtMs }).register({ name, email }, { signal })` resolves after ~1 s.
 - Rejects when the browser is offline (DevTools → Network → Offline), when the request takes
-  longer than 8 s (timeout via `AbortController`), or for any email at `fail.test`
-  (a documented test hook for demonstrating the Error state).
+  longer than 8 s (`AbortSignal.timeout`), once Halloween has started (sign-ups close), or for the
+  documented test hooks: an email ending in `@fail.test` (service error) or `@slow.test` (never
+  answers in time, to demonstrate the timeout).
+- The page also closes the form when the countdown reaches zero; the API's own check covers a
+  request that is already on its way at that moment.
 
 ### 3.5 Input Handling (`js/sanitize.js`) and Output
 

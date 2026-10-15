@@ -51,6 +51,8 @@
         Demo only: there is no real server, so nothing is actually sent.
       </p>
 
+      <p class="form-error" id="reminder-closed" hidden>Sign-ups are closed because Halloween has started.</p>
+
       <form id="reminder-form" data-state="idle">
         <p class="field">
           <label for="name">Your name</label>
@@ -75,8 +77,9 @@
       <details class="demo-notes">
         <summary>Try the error state</summary>
         <p>
-          Use an email ending in <code>@fail.test</code>, or switch DevTools to Offline
-          (Network panel) before pressing "Remind me".
+          Use an email ending in <code>@fail.test</code> (service error) or <code>@slow.test</code>
+          (no answer within 8 seconds), or switch DevTools to Offline (Network panel) before
+          pressing "Remind me".
         </p>
       </details>
     </section>

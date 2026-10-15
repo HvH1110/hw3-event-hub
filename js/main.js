@@ -1,5 +1,6 @@
-// Entry point: connects the countdown engine to the page.
+// Entry point: connects the countdown engine and the reminder form to the page.
 import { parseUtcIso, startCountdown } from './countdown.js';
+import { initRegistration } from './registration.js';
 
 const timeEl = document.querySelector('#event-start');
 const titleEl = document.querySelector('#countdown-title');
@@ -39,18 +40,18 @@ function checkTimeZone(zone) {
   return zone;
 }
 
-function initCountdown() {
-  let targetMs;
-  let eventZone;
+// Reads the event time from its single source, the <time datetime> attribute.
+// Returns null (and shows the reason) when the attribute or the time zone is invalid.
+function readEventTime() {
   try {
-    // Single source of truth: the <time datetime> attribute
-    targetMs = parseUtcIso(timeEl.dateTime);
-    eventZone = checkTimeZone(timeEl.dataset.timezone);
+    return { targetMs: parseUtcIso(timeEl.dateTime), eventZone: checkTimeZone(timeEl.dataset.timezone) };
   } catch (error) {
     statusEl.textContent = `Countdown unavailable. ${error.message}`;
-    return;
+    return null;
   }
+}
 
+function startEventCountdown({ targetMs, eventZone }, onStarted) {
   // The visible date is generated from the same attribute, so it can never disagree with it
   timeEl.textContent = formatInZone(targetMs, eventZone);
 
@@ -69,6 +70,7 @@ function initCountdown() {
       for (const [unit, el] of Object.entries(unitEls)) el.textContent = pad2(parts[unit]);
     },
     onDone() {
+      onStarted();
       if (Date.now() >= endMs) {
         showOver();
         return;
@@ -90,4 +92,10 @@ function showOver() {
   statusEl.textContent = 'See you next October. Your calendar is still safe to ignore.';
 }
 
-initCountdown();
+// Order matters: the form must exist before the countdown starts, because a page opened
+// after Halloween has started finishes the countdown immediately and closes sign-ups.
+const eventTime = readEventTime();
+const registration = initRegistration(document.querySelector('#reminder-form'), {
+  closesAtMs: eventTime ? eventTime.targetMs : Infinity,
+});
+if (eventTime) startEventCountdown(eventTime, () => registration.close());

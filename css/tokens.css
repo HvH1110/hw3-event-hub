@@ -1,0 +1,39 @@
+/* Design tokens: the only file allowed to contain color values.
+   No theme switch: the OS setting picks light (pumpkin on warm white) or dark (pumpkin at night). */
+:root {
+  color-scheme: light dark;
+
+  --bg-primary: #fffbf5;
+  --card-bg: #ffffff;
+  --text-primary: #1c1917;
+  --text-muted: #57534e;
+  --accent: #c2410c;
+  --on-accent: #ffffff;
+  --success: #15803d;
+  --error: #b91c1c;
+  --field-border: #78716c;
+  --border-color: #e7e5e4;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 3rem;
+  --radius: 12px;
+  --content-width: 40rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #17111f;
+    --card-bg: #241a30;
+    --text-primary: #fafaf9;
+    --text-muted: #d6d3d1;
+    --accent: #fb923c;
+    --on-accent: #17111f;
+    --success: #4ade80;
+    --error: #f87171;
+    --field-border: #a8a29e;
+    --border-color: #3f3350;
+  }
+}

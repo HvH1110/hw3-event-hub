@@ -8,7 +8,8 @@ A landing page for a real event, in vanilla HTML, CSS and JavaScript, built as t
 2. **State-machine registration form:** Idle → Submitting → Success / Error.
 3. **Double-submit prevention and input sanitization**, with zero XSS.
 
-Plus `AI_FAILURE_AUDIT.md`: three AI-induced defects, how each was diagnosed, and the fix.
+Plus `AI_FAILURE_AUDIT.md`: AI-induced defects caught while reviewing this build (at least three),
+how each was diagnosed, and the fix commit.
 
 **Event:** Halloween Countdown for People Over 20.
 
@@ -106,30 +107,35 @@ Each JS/CSS commit adds the `<script>` or `<link>` tag for its own file to `inde
   away) and the form gets `aria-busy="true"` while submitting.
 - An email that already registered successfully in this session is not sent again.
 
-## 4. One-Shot Experiment (source for `AI_FAILURE_AUDIT.md`)
+## 4. Review Workflow (source for `AI_FAILURE_AUDIT.md`)
 
-Slide 25 warns that passing the whole assignment to an AI in one prompt causes timezone and
-memory-leak bugs. To test that claim with real output:
+Every sub-task follows the same loop, so AI mistakes are caught by tests and stay visible in Git:
 
-1. Before any HW3 code is written, a **separate AI agent** receives the whole HW3 task in one prompt.
-2. Its output is kept **outside this repository** (`../hw3-one-shot-experiment/`).
-3. It is run against the same tests as this project's slices; every defect found is documented
-   in `AI_FAILURE_AUDIT.md` with the diagnostic method and the correct solution.
-4. Defects the AI introduces while building this project step by step are added too.
+1. **Atomic generation:** the AI drafts one sub-task only.
+2. **Commit the draft as written:** after reading the diff, the draft is committed as `feat(...)`.
+3. **Contract verification:** the sub-task's tests (section 5, written before the code) run in
+   headless Chrome through the DevTools protocol, with real key, timer and network behavior.
+4. **Every failing test is an AI-induced defect:** it is fixed in its own `fix(...)` commit and
+   recorded in `AI_FAILURE_AUDIT.md` (description, how the test or DevTools found it, fix commit).
+   `git show <fix commit>` then displays the defect and the fix side by side.
+
+No defects are planted on purpose. If the slices produce fewer than three, the audit says so, and
+T-06 adds harder edge-case tests (other time zones, background tabs, offline and slow network).
 
 ## 5. Work Breakdown
 
-| ID | Sub-task | Done when | Commit |
-|----|----------|-----------|--------|
+| ID | Sub-task | Tests (written before the code) | Draft commit |
+|----|----------|---------------------------------|--------------|
 | T-00 | This spec | Reviewed and agreed | `docs(spec): define component contracts & WBS table` |
-| T-01 | One-shot experiment + first audit findings | Experiment output tested; findings written | `docs(audit): one-shot experiment findings` |
-| T-02 | HTML: event content, `<time>` contract, countdown and form markup, CSP | 0 divs; `datetime` ends in `Z`; form labels | `feat(html): landing page & event time contract` |
-| T-03 | Tokens, reset, layout, form-state styles | 375px no horizontal scroll; contrast passes | `feat(css): tokens & landing layout` |
-| T-04 | **Slice 1:** drift-free countdown | Correct after main-thread stalls; one timer; stops at zero; correct time zones | `feat(js): drift-free countdown engine` |
-| T-05 | **Slice 2:** state machine + fake API | All transitions tested; invalid ones ignored; Error reachable | `feat(js): registration state machine` |
-| T-06 | **Slice 3:** double-submit guard + sanitization | 10 rapid submits → 1 request; XSS payloads shown as text | `fix(sec): double-submit guard & input sanitization` |
-| T-07 | Quality audit: 375px, keyboard, CSP, Lighthouse (both themes) | All acceptance criteria pass | `fix(...)` / `perf(...)` as needed |
-| T-08 | Final `AI_FAILURE_AUDIT.md` + AI log | 3+ defects documented with diagnosis and fix | `docs(audit): AI failure mode report` |
+| T-01 | HTML: event content, `<time>` contract, countdown and form markup, CSP | 0 divs; 1 `<h1>`; headings in order; every input labelled; `datetime` ends in `Z` and is the only copy of the date; zero console errors | `feat(html): landing page & event time contract` |
+| T-02 | Tokens, reset, layout, form-state styles | No horizontal scroll at 320 / 375 / 1280px in both themes; no hex outside `tokens.css`; Lighthouse contrast passes | `feat(css): tokens & landing layout` |
+| T-03 | **Slice 1:** drift-free countdown | Display = `target − now`; still exact after a 3 s main-thread freeze; exactly 1 pending timer, 0 after zero; "started" state at zero, never negative; correct text in Vietnam / New York / India time zones; moving the event = 1 attribute; a date without `Z` gives a clear message; re-sync after the tab was hidden | `feat(js): drift-free countdown engine` |
+| T-04 | **Slice 2:** state machine + fake API | Every transition in §3.3; every other (state, event) pair ignored; Success; Error via `fail.test`, offline and timeout; retry from Error | `feat(js): registration state machine` |
+| T-05 | **Slice 3:** double-submit guard + sanitization | 10 rapid submits and Enter-key spam → 1 request; a registered email is not sent again; XSS payloads shown as text with 0 injected elements; real names accepted; control characters removed; keyboard focus stays on the button while submitting | `feat(sec): double-submit guard & input sanitization` |
+| T-06 | Quality audit + edge cases | 375px, keyboard tour, zero CSP violations (`npx serve`), Lighthouse 100 in both themes | `fix(...)` / `perf(...)` as needed |
+| T-07 | Final `AI_FAILURE_AUDIT.md` + AI log | Every defect has a test, a diagnosis and a fix commit | `docs(audit): AI failure mode report` |
+
+Defects found by a sub-task's tests are fixed in separate commits right after its draft commit.
 
 ## 6. Live Defense Readiness
 

@@ -68,7 +68,9 @@ Each JS/CSS commit adds the `<script>` or `<link>` tag for its own file to `inde
 - Exactly one pending timer at any moment; `stop()` and reaching zero clear it (no leaks).
 - When the tab becomes visible again (`visibilitychange`), it re-syncs immediately: browsers slow
   timers down in background tabs.
-- At zero: stops and shows "The event has started". Invalid date: shows "Date to be announced".
+- At zero: stops and shows "It's Halloween!". After the day is over (start + 24 h, derived, not
+  stored): "Halloween is over for this year". An invalid date or time zone: "Countdown
+  unavailable." with the reason. (The "over" state was added after review test R1.)
 - The ticking number is `role="timer"` (not announced every second).
 
 ### 3.3 Registration State Machine (`js/form-machine.js`)
@@ -144,7 +146,7 @@ Defects found by a sub-task's tests are fixed in separate commits right after it
 | "Move the event to another date/time" | The `datetime` attribute in `index.html` (UTC, ending in `Z`). |
 | "Why `Z`? What if it's missing?" | Without a zone the string is read as the visitor's local time (§3.1). |
 | "Midnight where?" | Vietnam. One fixed instant for everyone; other visitors see it in their own clock (§3.1). |
-| "Halloween is over, what now?" | The page shows its "started" state; next year = change the year in one attribute. |
+| "Halloween is over, what now?" | The page says "Halloween is over for this year"; next year = change the year in one attribute. |
 | "Why not `setInterval` and subtract 1 each second?" | Timers are late and are slowed in background tabs; the counter drifts (§3.2). |
 | "Add a new form state (e.g. Waitlisted)" | One row in the transition table in `js/form-machine.js` + its status text. |
 | "Prove double-submit is impossible" | §3.6: machine guard + `aria-disabled`, and the 10-click test. |

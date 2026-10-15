@@ -12,6 +12,7 @@ const unitEls = {
   seconds: document.querySelector('[data-unit="seconds"]'),
 };
 
+const HALLOWEEN_LENGTH_MS = 24 * 60 * 60 * 1000;
 const pad2 = (n) => String(n).padStart(2, '0');
 
 function formatInZone(ms, timeZone) {
@@ -59,16 +60,34 @@ function initCountdown() {
     localEl.textContent = `Where you are, that is ${viewerTime}.`;
   }
 
+  // Halloween lasts one day (Vietnam has no daylight saving), so the end is derived, not stored
+  const endMs = targetMs + HALLOWEEN_LENGTH_MS;
+
   startCountdown({
     targetMs,
     onTick(parts) {
       for (const [unit, el] of Object.entries(unitEls)) el.textContent = pad2(parts[unit]);
     },
     onDone() {
-      titleEl.textContent = 'Halloween in Vietnam has started';
-      statusEl.textContent = "It's Halloween! Close the laptop and put on a costume.";
+      if (Date.now() >= endMs) {
+        showOver();
+        return;
+      }
+      showStarted();
+      // The first countdown has stopped; a second one switches to "over" if the page stays open
+      startCountdown({ targetMs: endMs, onTick() {}, onDone: showOver });
     },
   });
+}
+
+function showStarted() {
+  titleEl.textContent = 'Halloween in Vietnam has started';
+  statusEl.textContent = "It's Halloween! Close the laptop and put on a costume.";
+}
+
+function showOver() {
+  titleEl.textContent = 'Halloween is over for this year';
+  statusEl.textContent = 'See you next October. Your calendar is still safe to ignore.';
 }
 
 initCountdown();

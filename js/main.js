@@ -57,9 +57,10 @@ function startEventCountdown({ targetMs, eventZone }, onStarted) {
 
   const viewerZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const viewerTime = formatInZone(targetMs, viewerZone);
-  if (viewerTime !== timeEl.textContent) {
-    localEl.textContent = `Where you are, that is ${viewerTime}.`;
-  }
+  // Always filled: its two lines are reserved in CSS, so an empty line would just be a gap
+  localEl.textContent = viewerTime === timeEl.textContent
+    ? 'That is also the time where you are.'
+    : `Where you are, that is ${viewerTime}.`;
 
   // Halloween lasts one day (Vietnam has no daylight saving), so the end is derived, not stored
   const endMs = targetMs + HALLOWEEN_LENGTH_MS;

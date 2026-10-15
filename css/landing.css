@@ -46,10 +46,20 @@ main > section {
 }
 
 .clock-value {
+  display: inline-block;
+  min-width: 2ch; /* "--" is narrower than "15": reserve two digits so the value never moves */
   font-size: clamp(1.75rem, 1rem + 4vw, 3rem);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
+  text-align: center;
+}
+
+/* JS fills these lines after load (the full event date, and the visitor's own time), and on
+   phones each can wrap to two lines: reserve both lines so nothing below them shifts (CLS 0) */
+.event-time,
+.local-time {
+  min-height: 3.2em;
 }
 
 .clock-label,
